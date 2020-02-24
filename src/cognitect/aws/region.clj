@@ -10,16 +10,7 @@
             [cognitect.aws.util :as u]
             [cognitect.aws.config :as config]
             [cognitect.aws.ec2-metadata-utils :as ec2])
-  (:import (java.io File)
-           (java.util.concurrent Executors ExecutorService ThreadFactory)))
-
-(defonce ^:private scheduled-executor-service
-  (delay
-    (Executors/newScheduledThreadPool 1 (reify ThreadFactory
-                                          (newThread [_ r]
-                                            (doto (Thread. r)
-                                              (.setName "cognitect.aws-api.region-provider")
-                                              (.setDaemon true)))))))
+  (:import (java.io File)))
 
 (defn ^:skip-wiki valid-region
   "For internal use. Don't call directly.
@@ -122,4 +113,4 @@
     (instance-region-provider http-client)]))
 
 (defn fetch-async [provider]
-  (u/fetch-async fetch provider @scheduled-executor-service "region"))
+  (u/fetch-async fetch provider "region"))

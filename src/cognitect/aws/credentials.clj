@@ -100,7 +100,7 @@
          (when-let [r @scheduled-refresh-atom]
            (.cancel ^ScheduledFuture r true)))))))
 
-(defn ^{:deprecated true} auto-refreshing-credentials
+(defn ^:deprecated auto-refreshing-credentials
   "Deprecated. Use cached-credentials-with-auto-refresh"
   ([provider] (cached-credentials-with-auto-refresh provider))
   ([provider scheduler] (cached-credentials-with-auto-refresh provider scheduler)))
@@ -130,12 +130,13 @@
 ;;;; Providers
 
 (defn chain-credentials-provider
-  "Chain together multiple credentials provider.
+  "Returns a credentials-provider which chains together multiple
+  credentials providers.
 
-  Calls each provider in order until one return a non-nil result. This
-  provider is then cached for future calls to `fetch`.
+  `fetch` calls each provider in order until one returns a non-nil
+  result. This provider is then cached for future calls to `fetch`.
 
-  Returns nil if none of the providers return credentials.
+  `fetch` returns nil if none of the providers return credentials.
 
   Alpha. Subject to change."
   [providers]
@@ -298,7 +299,7 @@
           "ec2 instance"))))))
 
 (defn default-credentials-provider
-  "Return a chain-credentials-provider comprising, in order:
+  "Returns a chain-credentials-provider with (in order):
 
     environment-credentials-provider
     system-property-credentials-provider
@@ -330,4 +331,4 @@
        :aws/secret-access-key secret-access-key})))
 
 (defn fetch-async [provider]
-  (u/fetch-async fetch provider @scheduled-executor-service "credentials"))
+  (u/fetch-async fetch provider "credentials"))
