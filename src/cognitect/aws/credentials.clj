@@ -239,12 +239,21 @@
             (catch Throwable t
               (log/error t "Error fetching credentials from aws profiles file")))))))))
 
-(defn ^:skip-wiki calculate-ttl
-  "For internal use. Don't call directly."
-  [credentials]
-  (if-let [expiration (some-> credentials :Expiration Instant/parse)]
-    (max (- (.getSeconds (Duration/between (Instant/now) ^Instant expiration)) 300)
-         60)
+(defn calculate-ttl
+  "Primarily for internal use, returns time to live (ttl, in seconds),
+  based on `:Expiration` in credentials.  If `credentials` contains no
+  `:Expiration`, defaults to 3600.
+
+  `:Expiration` can be a java.util.Date, or a string parsable
+  by java.time.Instant/parse (returned by ec2/ecs instance credentials)
+  or a java.util.Date (returned from :AssumeRole on aws sts client)."
+  [{:keys [Expiration] :as credentials}]
+  (if Expiration
+    (let [expiration (if (inst? Expiration)
+                       (.toInstant Expiration)
+                       (Instant/parse Expiration))]
+      (max (- (.getSeconds (Duration/between (Instant/now) ^Instant expiration)) 300)
+           60))
     3600))
 
 (defn container-credentials-provider
